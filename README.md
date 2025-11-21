@@ -1,10 +1,10 @@
 # 智能排课系统 - 基于遗传算法的完整解决方案
 
-# V2.0更新内容：
-# 把代码中的schedule_result改为了schedule以正确写入数据
-# 把代码中的task_relations改为了task_relation_constraints以正确写入数据
-# 添加可视化脚本view_schedule
-# 在db_connector中修改了关系约束的查询方式以使其能正常运行
+## V2.0更新内容：
+## 把代码中的schedule_result改为了schedule以正确写入数据
+## 把代码中的task_relations改为了task_relation_constraints以正确写入数据
+## 添加可视化脚本view_schedule
+## 在db_connector中修改了关系约束的查询方式以使其能正常运行
 
 ## 系统概述
 
