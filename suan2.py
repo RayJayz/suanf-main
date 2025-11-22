@@ -56,7 +56,7 @@ class SchedulingSystem:
         self.data_loader = DataLoader(self.db_connector)
 
     def validate_version(self, version_id: int) -> bool:
-        """验证排课版本是否存在且状态正确"""
+        """验证排课版本是否存在且状态正确，不存在则自动创建"""
         query = "SELECT * FROM schedule_versions WHERE version_id = %s"
         result = self.db_connector.execute_query(query, (version_id,))
 

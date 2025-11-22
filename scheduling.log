@@ -984,3 +984,118 @@ KeyError: 'penalty_scores'
 2025-11-21 22:40:40,983 - __main__ - INFO - 排课完成，总耗时: 29.28 秒
 2025-11-21 22:40:40,984 - __main__ - INFO - 排课任务完成成功！
 2025-11-21 22:40:40,984 - db_connector - INFO - 数据库连接已关闭
+2025-11-22 17:56:22,404 - __main__ - INFO - ============================================================
+2025-11-22 17:56:22,404 - __main__ - INFO - 智能排课系统启动
+2025-11-22 17:56:22,405 - __main__ - INFO - ============================================================
+2025-11-22 17:56:22,405 - __main__ - INFO - 版本ID: 2
+2025-11-22 17:56:22,405 - __main__ - INFO - 遗传算法配置: {'population_size': 200, 'generations': 500, 'crossover_rate': 0.8, 'mutation_rate': 0.1, 'tournament_size': 5, 'elitism_size': 10, 'max_stagnation': 50}
+2025-11-22 17:56:22,405 - __main__ - INFO - 连接数据库: localhost:paike2
+2025-11-22 17:56:22,427 - db_connector - INFO - 数据库连接成功
+2025-11-22 17:56:22,428 - __main__ - ERROR - 排课版本 2 不存在
+2025-11-22 17:56:22,428 - __main__ - ERROR - 排课任务执行失败！
+2025-11-22 17:56:22,429 - db_connector - INFO - 数据库连接已关闭
+2025-11-22 18:04:02,327 - __main__ - INFO - ============================================================
+2025-11-22 18:04:02,327 - __main__ - INFO - 智能排课系统启动
+2025-11-22 18:04:02,327 - __main__ - INFO - ============================================================
+2025-11-22 18:04:02,327 - __main__ - INFO - 版本ID: 2
+2025-11-22 18:04:02,327 - __main__ - INFO - 遗传算法配置: {'population_size': 200, 'generations': 500, 'crossover_rate': 0.8, 'mutation_rate': 0.1, 'tournament_size': 5, 'elitism_size': 10, 'max_stagnation': 50}
+2025-11-22 18:04:02,328 - __main__ - INFO - 连接数据库: localhost:paike2
+2025-11-22 18:04:02,338 - db_connector - INFO - 数据库连接成功
+2025-11-22 18:04:02,339 - __main__ - INFO - 排课版本 2 不存在，自动创建...
+2025-11-22 18:04:02,339 - __main__ - ERROR - 创建排课版本失败: 'DatabaseConnector' object has no attribute 'execute_update'
+2025-11-22 18:04:02,339 - __main__ - ERROR - 排课任务执行失败！
+2025-11-22 18:04:02,339 - db_connector - INFO - 数据库连接已关闭
+2025-11-22 18:05:02,991 - __main__ - INFO - ============================================================
+2025-11-22 18:05:02,991 - __main__ - INFO - 智能排课系统启动
+2025-11-22 18:05:02,991 - __main__ - INFO - ============================================================
+2025-11-22 18:05:02,991 - __main__ - INFO - 版本ID: 2
+2025-11-22 18:05:02,992 - __main__ - INFO - 遗传算法配置: {'population_size': 200, 'generations': 500, 'crossover_rate': 0.8, 'mutation_rate': 0.1, 'tournament_size': 5, 'elitism_size': 10, 'max_stagnation': 50}
+2025-11-22 18:05:02,992 - __main__ - INFO - 连接数据库: localhost:paike2
+2025-11-22 18:05:03,012 - db_connector - INFO - 数据库连接成功
+2025-11-22 18:05:03,013 - __main__ - INFO - 排课版本 2 不存在，自动创建...
+2025-11-22 18:05:03,019 - __main__ - INFO - 成功创建排课版本 2
+2025-11-22 18:05:03,019 - __main__ - INFO - 验证版本成功: 版本2 (2024-2025-1)
+2025-11-22 18:05:03,020 - __main__ - INFO - 开始加载学期 2024-2025-1 的数据
+2025-11-22 18:05:03,020 - db_connector - INFO - 开始加载学期 2024-2025-1 的排课数据
+2025-11-22 18:05:03,030 - db_connector - INFO - 开始填充教学任务详细信息
+2025-11-22 18:05:03,031 - __main__ - ERROR - 排课过程中发生错误: list index out of range
+2025-11-22 18:05:03,032 - __main__ - ERROR - Traceback (most recent call last):
+  File "D:\suanf\suanf-main\suan2.py", line 165, in run_scheduling
+    data = self.data_loader.load_all_data(semester)
+  File "D:\suanf\suanf-main\db_connector.py", line 122, in load_all_data
+    self._enrich_teaching_tasks(data)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "D:\suanf\suanf-main\db_connector.py", line 259, in _enrich_teaching_tasks
+    query, (list(data["course_offerings"].values())[0].semester,)
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^
+IndexError: list index out of range
+
+2025-11-22 18:05:03,032 - __main__ - ERROR - 排课任务执行失败！
+2025-11-22 18:05:03,032 - db_connector - INFO - 数据库连接已关闭
+2025-11-22 18:06:40,583 - __main__ - INFO - ============================================================
+2025-11-22 18:06:40,583 - __main__ - INFO - 智能排课系统启动
+2025-11-22 18:06:40,584 - __main__ - INFO - ============================================================
+2025-11-22 18:06:40,584 - __main__ - INFO - 版本ID: 2
+2025-11-22 18:06:40,584 - __main__ - INFO - 遗传算法配置: {'population_size': 200, 'generations': 500, 'crossover_rate': 0.8, 'mutation_rate': 0.1, 'tournament_size': 5, 'elitism_size': 10, 'max_stagnation': 50}
+2025-11-22 18:06:40,584 - __main__ - INFO - 连接数据库: localhost:paike2
+2025-11-22 18:06:40,592 - db_connector - INFO - 数据库连接成功
+2025-11-22 18:06:40,593 - __main__ - INFO - 验证版本成功: 版本2 (2024-2025-1)
+2025-11-22 18:06:40,593 - __main__ - INFO - 开始加载学期 2024-2025-1 的数据
+2025-11-22 18:06:40,593 - db_connector - INFO - 开始加载学期 2024-2025-1 的排课数据
+2025-11-22 18:06:40,602 - db_connector - INFO - 开始填充教学任务详细信息
+2025-11-22 18:06:40,602 - __main__ - ERROR - 排课过程中发生错误: list index out of range
+2025-11-22 18:06:40,603 - __main__ - ERROR - Traceback (most recent call last):
+  File "D:\suanf\suanf-main\suan2.py", line 170, in run_scheduling
+    data = self.data_loader.load_all_data(semester)
+  File "D:\suanf\suanf-main\db_connector.py", line 122, in load_all_data
+    self._enrich_teaching_tasks(data)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "D:\suanf\suanf-main\db_connector.py", line 259, in _enrich_teaching_tasks
+    query, (list(data["course_offerings"].values())[0].semester,)
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^
+IndexError: list index out of range
+
+2025-11-22 18:06:40,604 - __main__ - ERROR - 排课任务执行失败！
+2025-11-22 18:06:40,604 - db_connector - INFO - 数据库连接已关闭
+2025-11-22 18:07:12,848 - __main__ - INFO - ============================================================
+2025-11-22 18:07:12,848 - __main__ - INFO - 智能排课系统启动
+2025-11-22 18:07:12,848 - __main__ - INFO - ============================================================
+2025-11-22 18:07:12,849 - __main__ - INFO - 版本ID: 1
+2025-11-22 18:07:12,849 - __main__ - INFO - 遗传算法配置: {'population_size': 200, 'generations': 500, 'crossover_rate': 0.8, 'mutation_rate': 0.1, 'tournament_size': 5, 'elitism_size': 10, 'max_stagnation': 50}
+2025-11-22 18:07:12,849 - __main__ - INFO - 连接数据库: localhost:paike2
+2025-11-22 18:07:12,875 - db_connector - INFO - 数据库连接成功
+2025-11-22 18:07:12,876 - __main__ - INFO - 验证版本成功: 测试版本1 (2025-2026-1)
+2025-11-22 18:07:12,877 - __main__ - INFO - 开始加载学期 2025-2026-1 的数据
+2025-11-22 18:07:12,877 - db_connector - INFO - 开始加载学期 2025-2026-1 的排课数据
+2025-11-22 18:07:12,888 - db_connector - INFO - 开始填充教学任务详细信息
+2025-11-22 18:07:12,891 - db_connector - INFO - 教学任务详细信息填充完成
+2025-11-22 18:07:12,892 - db_connector - INFO - 所有数据加载完成
+2025-11-22 18:07:12,892 - __main__ - INFO - 开始验证数据完整性
+2025-11-22 18:07:12,892 - __main__ - INFO - 数据完整性检查通过
+2025-11-22 18:07:12,892 - __main__ - INFO -   - 教学任务: 153 个
+2025-11-22 18:07:12,892 - __main__ - INFO -   - 教师: 250 人
+2025-11-22 18:07:12,892 - __main__ - INFO -   - 教室: 133 间
+2025-11-22 18:07:12,892 - __main__ - INFO -   - 班级: 80 个
+2025-11-22 18:07:12,892 - __main__ - INFO - 初始化遗传算法
+2025-11-22 18:07:12,892 - genetic_algorithm - INFO - 开始预处理数据
+2025-11-22 18:07:12,893 - genetic_algorithm - INFO - 任务优先级排序完成：长课程优先，必修课优先
+2025-11-22 18:07:12,893 - genetic_algorithm - INFO - 预处理完成：153个任务，133个教室
+2025-11-22 18:07:12,894 - __main__ - INFO - 开始运行遗传算法
+2025-11-22 18:07:12,894 - genetic_algorithm - INFO - 开始遗传算法进化
+2025-11-22 18:07:36,275 - genetic_algorithm - INFO - 第 0 代，新的最佳适应度: -1225000.00
+2025-11-22 18:07:36,276 - __main__ - ERROR - 排课过程中发生错误: 'TeachingTask' object has no attribute 'class_id'
+2025-11-22 18:07:36,278 - __main__ - ERROR - Traceback (most recent call last):
+  File "D:\suanf\suanf-main\suan2.py", line 182, in run_scheduling
+    best_solution = ga.evolve()
+  File "D:\suanf\suanf-main\genetic_algorithm.py", line 1035, in evolve
+    child1 = self.mutate(child1)
+  File "D:\suanf\suanf-main\genetic_algorithm.py", line 909, in mutate
+    mutated[i] = self._repair_conflicting_gene(gene, mutated[:i] + mutated[i+1:], task)
+                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\suanf\suanf-main\genetic_algorithm.py", line 922, in _repair_conflicting_gene
+    if task.class_id == other_task.class_id:
+       ^^^^^^^^^^^^^
+AttributeError: 'TeachingTask' object has no attribute 'class_id'. Did you mean: 'classes'?
+
+2025-11-22 18:07:36,279 - __main__ - ERROR - 排课任务执行失败！
+2025-11-22 18:07:36,279 - db_connector - INFO - 数据库连接已关闭

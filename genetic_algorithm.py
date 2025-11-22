@@ -76,18 +76,17 @@ class SchedulingGeneticAlgorithm:
                 "capacity_violation": -5000,
                 "blackout_violation": -5000,
                 "feature_violation": -5000,
-                "thursday_afternoon": -5000,
-                # 校区通勤现在视为硬约束（一天多个校区代价很大）
-                "campus_commute": -5000,
-                "teacher_preference": 100,
-                "classroom_continuity": 150,
-                "utilization_waste": 1,
-                "student_overload": 300,
-                "task_relation": 200,
-                "required_night_penalty": 500,  # 新增：必修课夜间惩罚
-                "required_weekend_penalty": 300,  # 新增：必修课周末惩罚（已包含在 weekend_penalty 中）
-                "elective_prime_time_penalty": 50,  # 新增：选修课占用黄金时段惩罚
-                "weekend_penalty": -10000,  # 修改：禁止周末排课（硬约束级别）
+                "thursday_afternoon": -3000,  # 降低惩罚：周四下午不是硬约束
+                "campus_commute": -5000,  # 校区通勤保持硬约束
+                "teacher_preference": 150,  # 提高：更重视教师偏好
+                "classroom_continuity": 200,  # 提高：鼓励同一门课使用相同教室
+                "utilization_waste": 50,  # 提高：更重视教室利用率
+                "student_overload": 200,  # 降低：允许一定灵活性
+                "task_relation": 300,  # 提高：更重视课程关系约束
+                "required_night_penalty": 400,  # 必修课夜间惩罚
+                "required_weekend_penalty": 300,  # 必修课周末额外惩罚
+                "elective_prime_time_penalty": 30,  # 降低：给选修课更多灵活性
+                "weekend_penalty": -10000,  # 禁止周末排课（硬约束）
             },
         }
 
@@ -337,12 +336,9 @@ class SchedulingGeneticAlgorithm:
         if not offering:
             return list(range(1, 6))  # 默认工作日
 
-        # 必修课和通识课优先安排在周一到周五
-        if offering.course_nature in [CourseNature.REQUIRED, CourseNature.GENERAL]:
-            return list(range(1, 6))  # 周一到周五
-        else:
-            # 选修课可以安排在任何时间，包括周末
-            return list(range(1, 8))  # 周一到周日
+        # 所有课程都只安排在工作日（周一到周五）
+        # 避免周末排课以符合学生作息习惯
+        return list(range(1, 6))  # 周一到周五
 
     def _get_preferred_time_slots(
         self, task: TeachingTask, valid_slots: List[tuple]
@@ -431,8 +427,11 @@ class SchedulingGeneticAlgorithm:
             suitable_classrooms.append(classroom)
 
         if suitable_classrooms:
-            # 优先选择容量接近的教室
-            suitable_classrooms.sort(key=lambda x: x.capacity - task.student_count)
+            # 优先选择容量接近的教室（提高利用率）
+            # 利用率 = 学生数 / 教室容量，越接近1越好
+            suitable_classrooms.sort(
+                key=lambda x: abs(x.capacity - task.student_count * 1.2)  # 允许20%的冗余
+            )
             return suitable_classrooms[0]
 
         return None
@@ -835,13 +834,13 @@ class SchedulingGeneticAlgorithm:
         return child1, child2
 
     def mutate(self, individual: List[Gene]) -> List[Gene]:
-        """变异操作"""
+        """变异操作（增强版，带冲突修复）"""
         mutated = individual[:]
 
         for i, gene in enumerate(mutated):
             if random.random() < self.config["mutation_rate"]:
                 # 随机选择变异类型
-                mutation_type = random.choice(["teacher", "time", "classroom"])
+                mutation_type = random.choice(["teacher", "time", "classroom", "smart_repair"])
 
                 task = self.task_dict[gene.task_id]
 
@@ -859,10 +858,15 @@ class SchedulingGeneticAlgorithm:
                     )
 
                 elif mutation_type == "time":
-                    # 更换时间
+                    # 更换时间（避开周末）
                     valid_slots = get_valid_time_slots(task.slots_count)
-                    new_weekday = random.randint(1, 7)
+                    new_weekday = random.randint(1, 5)  # 只选工作日
                     new_start_slot, _ = random.choice(valid_slots)
+                    
+                    # 避开周四下午
+                    if new_weekday == 4 and new_start_slot >= 6:
+                        new_start_slot = random.choice([s for s, _ in valid_slots if s < 6])
+                    
                     mutated[i] = Gene(
                         gene.task_id,
                         gene.teacher_id,
@@ -872,7 +876,7 @@ class SchedulingGeneticAlgorithm:
                     )
 
                 elif mutation_type == "classroom":
-                    # 更换教室
+                    # 更换教室（优先选择容量匹配的）
                     suitable_classrooms = [
                         cr
                         for cr in self.classrooms
@@ -882,7 +886,16 @@ class SchedulingGeneticAlgorithm:
                         )
                     ]
                     if suitable_classrooms:
-                        new_classroom = random.choice(suitable_classrooms)
+                        # 按容量接近程度排序
+                        suitable_classrooms.sort(
+                            key=lambda x: abs(x.capacity - task.student_count * 1.2)
+                        )
+                        # 有70%概率选最佳，30%随机选择
+                        if random.random() < 0.7:
+                            new_classroom = suitable_classrooms[0]
+                        else:
+                            new_classroom = random.choice(suitable_classrooms[:5] if len(suitable_classrooms) > 5 else suitable_classrooms)
+                        
                         mutated[i] = Gene(
                             gene.task_id,
                             gene.teacher_id,
@@ -890,8 +903,77 @@ class SchedulingGeneticAlgorithm:
                             gene.week_day,
                             gene.start_slot,
                         )
+                
+                elif mutation_type == "smart_repair":
+                    # 智能修复：检测冲突并尝试解决
+                    mutated[i] = self._repair_conflicting_gene(gene, mutated[:i] + mutated[i+1:], task)
 
         return mutated
+    
+    def _repair_conflicting_gene(self, gene: Gene, other_genes: List[Gene], task: TeachingTask) -> Gene:
+        """修复有冲突的基因"""
+        # 检查当前基因是否有冲突
+        has_conflict = False
+        for other_gene in other_genes:
+            if other_gene.week_day == gene.week_day and other_gene.start_slot == gene.start_slot:
+                other_task = self.task_dict[other_gene.task_id]
+                
+                # 检查班级冲突
+                if task.class_id == other_task.class_id:
+                    has_conflict = True
+                    break
+                
+                # 检查教师冲突
+                if gene.teacher_id == other_gene.teacher_id:
+                    has_conflict = True
+                    break
+                
+                # 检查教室冲突
+                if gene.classroom_id == other_gene.classroom_id:
+                    has_conflict = True
+                    break
+        
+        if not has_conflict:
+            return gene  # 无冲突，不需要修复
+        
+        # 尝试找到无冲突的时间
+        valid_slots = get_valid_time_slots(task.slots_count)
+        attempts = 0
+        max_attempts = 30
+        
+        while attempts < max_attempts:
+            new_weekday = random.randint(1, 5)  # 工作日
+            new_start_slot, _ = random.choice(valid_slots)
+            
+            # 避开周四下午
+            if new_weekday == 4 and new_start_slot >= 6:
+                attempts += 1
+                continue
+            
+            # 检查新时间是否有冲突
+            new_has_conflict = False
+            for other_gene in other_genes:
+                if other_gene.week_day == new_weekday and other_gene.start_slot == new_start_slot:
+                    other_task = self.task_dict[other_gene.task_id]
+                    if (task.class_id == other_task.class_id or 
+                        gene.teacher_id == other_gene.teacher_id):
+                        new_has_conflict = True
+                        break
+            
+            if not new_has_conflict:
+                # 找到无冲突时间
+                return Gene(
+                    gene.task_id,
+                    gene.teacher_id,
+                    gene.classroom_id,
+                    new_weekday,
+                    new_start_slot,
+                )
+            
+            attempts += 1
+        
+        # 如果找不到，返回原基因
+        return gene
 
     def tournament_selection(
         self, population: List[List[Gene]], fitness_scores: List[float]
