@@ -281,8 +281,8 @@ class SchedulingGeneticAlgorithm:
             # 随机选择教师
             teacher_id = random.choice(task.teachers)
 
-            # 随机选择时间（包括非偏好时间）
-            weekday = random.randint(1, 7)
+            # 随机选择时间（仅限工作日，禁止周末）
+            weekday = random.randint(1, 5)  # 强制限制为周一到周五
             start_slot, _ = random.choice(valid_slots)
 
             # 检查周四下午限制
@@ -858,14 +858,15 @@ class SchedulingGeneticAlgorithm:
                     )
 
                 elif mutation_type == "time":
-                    # 更换时间（避开周末）
+                    # 更换时间（仅限工作日，禁止周末）
                     valid_slots = get_valid_time_slots(task.slots_count)
-                    new_weekday = random.randint(1, 5)  # 只选工作日
-                    new_start_slot, _ = random.choice(valid_slots)
-                    
-                    # 避开周四下午
-                    if new_weekday == 4 and new_start_slot >= 6:
-                        new_start_slot = random.choice([s for s, _ in valid_slots if s < 6])
+                    # 重试机制避开周四下午
+                    for _ in range(20):
+                        new_weekday = random.randint(1, 5)  # 强制工作日
+                        new_start_slot, _ = random.choice(valid_slots)
+                        # 如果不是周四下午，接受
+                        if not (new_weekday == 4 and new_start_slot >= 6):
+                            break
                     
                     mutated[i] = Gene(
                         gene.task_id,
@@ -1041,4 +1042,75 @@ class SchedulingGeneticAlgorithm:
         )
 
         logger.info(f"进化完成，最终最佳适应度: {final_fitness_scores[best_idx]:.2f}")
-        return population[best_idx]
+        
+        # 后处理：强制修正所有周末排课
+        best_solution = population[best_idx]
+        best_solution = self._force_remove_weekend_classes(best_solution)
+        
+        return best_solution
+    
+    def _force_remove_weekend_classes(self, individual: List[Gene]) -> List[Gene]:
+        """强制将所有周末排课改到工作日"""
+        fixed = []
+        modified_count = 0
+        
+        for gene in individual:
+            if gene.week_day >= 6:  # 周六或周日
+                task = self.task_dict[gene.task_id]
+                valid_slots = get_valid_time_slots(task.slots_count)
+                
+                # 尝试找到工作日的空闲时间
+                found = False
+                for weekday in range(1, 6):  # 周一到周五
+                    for start_slot, _ in valid_slots:
+                        # 避开周四下午
+                        if weekday == 4 and start_slot >= 6:
+                            continue
+                        
+                        # 检查是否与其他课程冲突
+                        has_conflict = False
+                        for other_gene in fixed:
+                            if other_gene.week_day == weekday and other_gene.start_slot == start_slot:
+                                other_task = self.task_dict[other_gene.task_id]
+                                # 检查班级、教师、教室冲突
+                                if (set(task.classes) & set(other_task.classes) or
+                                    gene.teacher_id == other_gene.teacher_id or
+                                    gene.classroom_id == other_gene.classroom_id):
+                                    has_conflict = True
+                                    break
+                        
+                        if not has_conflict:
+                            # 找到合适时间，修正
+                            fixed.append(Gene(
+                                gene.task_id,
+                                gene.teacher_id,
+                                gene.classroom_id,
+                                weekday,
+                                start_slot
+                            ))
+                            modified_count += 1
+                            found = True
+                            break
+                    
+                    if found:
+                        break
+                
+                if not found:
+                    # 如果找不到无冲突时间，随机分配到工作日（会有冲突惩罚）
+                    new_weekday = random.randint(1, 5)
+                    new_start_slot, _ = random.choice(valid_slots)
+                    fixed.append(Gene(
+                        gene.task_id,
+                        gene.teacher_id,
+                        gene.classroom_id,
+                        new_weekday,
+                        new_start_slot
+                    ))
+                    modified_count += 1
+            else:
+                fixed.append(gene)
+        
+        if modified_count > 0:
+            logger.info(f"后处理：已将 {modified_count} 个周末排课调整到工作日")
+        
+        return fixed
