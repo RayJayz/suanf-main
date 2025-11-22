@@ -917,49 +917,40 @@ class SchedulingGeneticAlgorithm:
         for other_gene in other_genes:
             if other_gene.week_day == gene.week_day and other_gene.start_slot == gene.start_slot:
                 other_task = self.task_dict[other_gene.task_id]
-                
-                # 检查班级冲突
-                if task.class_id == other_task.class_id:
+                # 检查班级冲突（有交集即冲突）
+                if set(task.classes) & set(other_task.classes):
                     has_conflict = True
                     break
-                
                 # 检查教师冲突
                 if gene.teacher_id == other_gene.teacher_id:
                     has_conflict = True
                     break
-                
                 # 检查教室冲突
                 if gene.classroom_id == other_gene.classroom_id:
                     has_conflict = True
                     break
-        
         if not has_conflict:
             return gene  # 无冲突，不需要修复
-        
         # 尝试找到无冲突的时间
         valid_slots = get_valid_time_slots(task.slots_count)
         attempts = 0
         max_attempts = 30
-        
         while attempts < max_attempts:
             new_weekday = random.randint(1, 5)  # 工作日
             new_start_slot, _ = random.choice(valid_slots)
-            
             # 避开周四下午
             if new_weekday == 4 and new_start_slot >= 6:
                 attempts += 1
                 continue
-            
             # 检查新时间是否有冲突
             new_has_conflict = False
             for other_gene in other_genes:
                 if other_gene.week_day == new_weekday and other_gene.start_slot == new_start_slot:
                     other_task = self.task_dict[other_gene.task_id]
-                    if (task.class_id == other_task.class_id or 
+                    if (set(task.classes) & set(other_task.classes) or 
                         gene.teacher_id == other_gene.teacher_id):
                         new_has_conflict = True
                         break
-            
             if not new_has_conflict:
                 # 找到无冲突时间
                 return Gene(
@@ -969,9 +960,7 @@ class SchedulingGeneticAlgorithm:
                     new_weekday,
                     new_start_slot,
                 )
-            
             attempts += 1
-        
         # 如果找不到，返回原基因
         return gene
 
