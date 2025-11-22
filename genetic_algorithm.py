@@ -85,9 +85,9 @@ class SchedulingGeneticAlgorithm:
                 "student_overload": 300,
                 "task_relation": 200,
                 "required_night_penalty": 500,  # 新增：必修课夜间惩罚
-                "required_weekend_penalty": 300,  # 新增：必修课周末惩罚
+                "required_weekend_penalty": 300,  # 新增：必修课周末惩罚（已包含在 weekend_penalty 中）
                 "elective_prime_time_penalty": 50,  # 新增：选修课占用黄金时段惩罚
-                "weekend_penalty": 200,  # 新增：所有课程安排到周末的基础惩罚
+                "weekend_penalty": -10000,  # 修改：禁止周末排课（硬约束级别）
             },
         }
 
